@@ -8,9 +8,14 @@ s.listen(5)
 conn, addr = s.accept()
 conn.setblocking(False)
 
-targhet=0
-current=0
+targhetx=0
+currentx=0
+directionx=0
+targhety=0
+currenty=0
+directiony=0
 buffer=[]
+absolute=0
 ax=""
 b=[]
 
@@ -24,25 +29,70 @@ def extract(a4):
     return vrt    
 
 def gcode_exec(strg):
-    global targhet,current
-    
+    global targhetx,currentx,targhety,currenty,directionx,directiony,absolute
+
+    if "G90" in strg:
+        print("absolute")
+        absolute=0
+        
+    if "G91" in strg:
+        print("incremental")
+        absolute=1       
+
     if ("X") in strg:
         nn=strg.split("X")
-        k=int(float(extract(nn[1])))        
-        targhet=k-current
-        print(targhet)
+        k=int(float(extract(nn[1]))) 
+        print("arivatto=",k)
+        if absolute:                 # incremental
+            targhetx=currentx+k
+            print("targhet incr=",targhet)
+            if targhetx>currentx:
+                directionx=1
+            else:
+                directionx=0                           
+        else :                        #absolute
+            targhet=k
+            print("targhet abs=",targhet)
+            if targhetx>currentx:
+                directionx=1
+            else:
+                directionx=0          
+
+    if ("Y") in strg:
+        nn=strg.split("Y")
+        k=int(float(extract(nn[1]))) 
+        print("arivatto=",k)
+        if absolute:                 # incremental
+            targhet=current+k
+            print("targhet incr=",targhet)
+            if targhet>current:
+                direction=1
+            else:
+                direction=0                           
+        else :                        #absolute
+            targhet=k
+            print("targhet abs=",targhet)
+            if targhet>current:
+                direction=1
+            else:
+                direction=0                         
 
 def do_step():
-    current =+1
-    #print(current)
+    global currentx,directionx,currenty,directiony
+    if directionx:
+        currentx +=1
+    else:
+        currentx -=1
+    print("do_step-current",current)
     time.sleep(.1)
 
 while True:
-    if current==targhet:
-        if len(buffer)>0:
-            gcode_exec(buffer.pop(0))    
+    if current==targhet: # arrivatto in punto di destinazione
+        if len(buffer)>0: # daca buffer e gol atunci sare peste asta
+            gcode_exec(buffer.pop(0)) 
+            conn.send("ok\n")   
     else:
-        do_step()
+            do_step() # executa pana ajunge la destinazione
     try:       
         request = conn.recv(200).decode()         
         if "?" in request:   
