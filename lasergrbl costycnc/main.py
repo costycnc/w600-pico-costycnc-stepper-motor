@@ -16,9 +16,11 @@ targhety=0
 currenty=0
 directiony=0
 buffer=[]
-absolute=0
+absolute=1
 kx=0
 ky=0
+dx=0
+dy=0
 ax=""
 b=[]
 este=0
@@ -37,9 +39,7 @@ def extract(a4):
     return vrt    
 
 def gcode_exec(strg):
-    global targhetx,currentx,targhety,currenty,directionx,directiony,absolute,k,mx,my,tmpx,tmpy
-    print(strg)
-    este=0
+    global targhetx,currentx,targhety,currenty,directionx,directiony,absolute,k,mx,my,tmpx,tmpy,dx,dy
     if "G90" in strg:
         absolute=1
         
@@ -57,7 +57,6 @@ def gcode_exec(strg):
             targhetx=k             
         else:
             targhetx=currentx+k
-        tmpx=1
         mx=targhetx-currentx
         if targhetx>currentx:
             directionx=1
@@ -72,29 +71,26 @@ def gcode_exec(strg):
             targhety=k
         else:
             targhety=currenty+k 
-        tmpy=1
-        my=targhety-currenty    
+        my=targhety-currenty          
         if targhety>currenty:
             directiony=1
         else:
-            directiony=-1 
-    print("prima targhetx=",targhetx)
-    print("prima targhety=",targhety)    
+            directiony=-1
+    #print("---------------------------------------------------")        
+    #print("prima currentx=",currentx," currenty=",currenty) 
+    #print(strg)    
+    #print(" prima mx=",mx," my=",my," dirx=",directionx," diry=",directiony)            
     if (mx and my):
-        if mx>my:            # ex: first X=0 Y=0  -> dopo X=10 Y=3
-            tmpx=int(mx/my)  # 10/3=3.3 -> int(3.3)=3 -> tmpx=3
-            targhetx=tmpx*my # tmpx=3 my=3 -> 3*3=9 -> targhetx=9
-            #directionx is 1 or -1
-            directiony=directiony*tmpx # directiony=1 tmpx=3 -> 1*3=3 -> directiony=3
-            #so ... at 3 step x will make one step y
-        if my>mx: 
-            tmpy=int(my/mx)
-            targhety=tmpy*mx
-            directionx=directionx*tmpy            
-    print("dopo targhetx=",targhetx)
-    print("dopo targhety=",targhety)      
-                      
-
+        dx=directionx
+        dy=directiony
+        if abs(mx)>abs(my):                      
+            directionx=dx*int(mx/my) 
+            targhetx=currentx+(abs(my)*directionx)
+        if abs(my)>abs(mx):                      
+            directiony=dy*int(my/mx) 
+            targhety=currenty+(abs(mx)*directiony)      
+    #print("dupa tx=",targhetx,"ty=",targhety,"dix=",directionx," diy=",directiony)        
+    
 def do_step():
     global currentx,directionx,currenty,directiony,targhetx,targhety
 
@@ -105,29 +101,33 @@ def do_step():
     if my:        
         currenty +=directiony
   
-    print("currentx=",currentx," targhetx=",targhetx)
-    print("currenty=",currenty," targhety=",targhety)
-
-    
-    time.sleep(.1)
+    #print("dirx=",directionx," diry=",directiony)
+    #print("x=",currentx," to ",targhetx," y=",currenty," to ",targhety)  
+    time.sleep(.001)
 
 while True:
     if (currentx==targhetx) and (currenty==targhety): # arrivatto in punto di destinazione
         if len(buffer)>0: # daca buffer e gol atunci sare peste asta
+            #print(len(buffer)," buffer prima=",buffer)
             gcode_exec(buffer.pop(0)) 
+            #print(len(buffer)," buffer dopo=",buffer)
             conn.send("ok\n")   
     else:
             do_step() # executa pana ajunge la destinazione
     try:       
         request = conn.recv(200).decode()         
         if "?" in request:   
-            conn.send("<Idle|MPos:0.000,0.000,0.000|FS:0,0>\r")
+            conn.send("<Idle|MPos:"+str(currentx)+","+str(currenty)+",0.000|FS:0,0>\r")
         elif "$$" in request:
             conn.send("ok\n")
         else: 
-            b=request.split("\n")
-            for a in b:            
-                buffer.append(a)
+            if len(buffer)<10:
+                b=request.split("\n")
+                for a in b: 
+                    if a=="": 
+                        pass
+                    else:                        
+                        buffer.append(a)
 
                 
     except OSError as e:
