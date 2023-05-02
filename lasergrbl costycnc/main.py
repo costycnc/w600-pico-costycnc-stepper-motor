@@ -1,7 +1,13 @@
 # main.py -- put your code here!
 # costycnc gcode interpreter 1.0
+from machine import Pin
 import socket
 import time
+
+led = Pin(Pin.PB_09, Pin.OUT, Pin.PULL_FLOATING)
+led1 = Pin(Pin.PB_10, Pin.OUT, Pin.PULL_FLOATING)
+led2 = Pin(Pin.PB_11, Pin.OUT, Pin.PULL_FLOATING)
+led3 = Pin(Pin.PB_12, Pin.OUT, Pin.PULL_FLOATING)
 
 s = socket.socket()
 s.bind(('', 23))
@@ -25,6 +31,54 @@ nn=[]
 este=0
 
 
+def movex(pasx):
+    print(pasx)
+    if pasx==0:
+        led.value(1)
+        led1.value(0)
+        led2.value(0)
+        led3.value(1)
+    if pasx==1:
+        led.value(1)
+        led1.value(0)
+        led2.value(0)
+        led3.value(0)
+    if pasx==2:
+        led.value(1)
+        led1.value(1)
+        led2.value(0)
+        led3.value(0)
+    if pasx==3:
+        led.value(0)
+        led1.value(1)
+        led2.value(0)
+        led3.value(0)
+    if pasx==4:
+        led.value(0)
+        led1.value(1)
+        led2.value(1)
+        led3.value(0)
+    if pasx==5:
+        led.value(0)
+        led1.value(0)
+        led2.value(1)
+        led3.value(0)
+    if pasx==6:
+        led.value(0)
+        led1.value(0)
+        led2.value(1)
+        led3.value(1)
+    if pasx==7:
+        led.value(0)
+        led1.value(0)
+        led2.value(0)
+        led3.value(1)
+
+    
+def movey(valy):
+    print(valy)    
+
+
 def extract(a4):
     vrt=""
     for a5 in a4:    
@@ -45,7 +99,7 @@ def gcode_exec(strg):
       
     if ("X") in strg:
         nn=strg.split("X")
-        k=int(float(extract(nn[1]))*10)
+        k=int(float(extract(nn[1]))*100)
         if absolute:
             x1=k             
         else:
@@ -55,14 +109,12 @@ def gcode_exec(strg):
     if ("Y") in strg:
         targhety=0
         nn=strg.split("Y")
-        k=int(float(extract(nn[1]))*10)
+        k=int(float(extract(nn[1]))*100)
         if absolute:
             y1=k
         else:
             y1=y0+k 
-            
-        
-    print(x0," ",y0," ",x1," ",y1)
+    #print(x0," ",y0," ",x1," ",y1)
     dx = abs(x1 - x0)
     if x0<x1:
         sx=1
@@ -73,19 +125,23 @@ def gcode_exec(strg):
         sy=1
     else:
         sy=-1
-    error = dx + dy        
+    error = dx + dy           
+        
+       
            
     
 def do_step(): 
     global currentx,x0,y0,x1,y1,sx,sy,dx,dy,error
-    print("x0=",x0," x1=",x1," y0=",y0," y1=",y1)
+    #print("x0=",x0," x1=",x1," y0=",y0," y1=",y1)
     e2 = 2 * error
     if e2 >= dy:
         error = error + dy
         x0 = x0 + sx
+        movex((x0&4)+(x0&2)+(x0&1))
     if e2 <= dx:
         error = error + dx
-        y0 = y0 + sy   
+        y0 = y0 + sy
+        movey((y0&4)+(y0&2)+(y0&1))        
     time.sleep(.001)
     
     
@@ -105,7 +161,7 @@ while True:
     try:       
         request = conn.recv(200).decode()         
         if "?" in request:   
-            conn.send("<Idle|MPos:"+str(x0/10)+","+str(y0/10)+",0.000|FS:0,0>\r")
+            conn.send("<Idle|MPos:"+str(x0/100)+","+str(y0/100)+",0.000|FS:0,0>\r")
         elif "$$" in request:
             conn.send("ok\n")
         else: 
