@@ -8,26 +8,22 @@ s.bind(('', 23))
 s.listen(5)
 conn, addr = s.accept()
 conn.setblocking(False)
-
-targhetx=0
-currentx=0
-directionx=0
-targhety=0
-currenty=0
-directiony=0
-buffer=[]
-absolute=1
-kx=0
-ky=0
+x0=0
+y0=0
+x1=0
+y1=0
 dx=0
 dy=0
-ax=""
-b=[]
+sx=0
+sy=0
+error=0
+buffer=[]
+currentx=0
+absolute=0
+k=0
+nn=[]
 este=0
-movementx=0
-movementy=0
-tmpx=0
-tmpy=0
+
 
 def extract(a4):
     vrt=""
@@ -39,85 +35,77 @@ def extract(a4):
     return vrt    
 
 def gcode_exec(strg):
-    global targhetx,currentx,targhety,currenty,directionx,directiony,absolute,k,mx,my,tmpx,tmpy,dx,dy
+    global x0,y0,x1,y1,dx,dy,sx,sy,error,absolute,este
     if "G90" in strg:
         absolute=1
         
     if "G91" in strg:
         absolute=0       
-    mx=0
-    my=0
-    tmpx=0
-    tmpy=0
+    
+      
     if ("X") in strg:
-        targhetx=0
         nn=strg.split("X")
         k=int(float(extract(nn[1])))
         if absolute:
-            targhetx=k             
+            x1=k             
         else:
-            targhetx=currentx+k
-        mx=targhetx-currentx
-        if targhetx>currentx:
-            directionx=1
-        else:
-            directionx=-1 
+            x1=x0+k
+   
   
     if ("Y") in strg:
         targhety=0
         nn=strg.split("Y")
         k=int(float(extract(nn[1])))
         if absolute:
-            targhety=k
+            y1=k
         else:
-            targhety=currenty+k 
-        my=targhety-currenty          
-        if targhety>currenty:
-            directiony=1
-        else:
-            directiony=-1
-    #print("---------------------------------------------------")        
-    #print("prima currentx=",currentx," currenty=",currenty) 
-    #print(strg)    
-    #print(" prima mx=",mx," my=",my," dirx=",directionx," diry=",directiony)            
-    if (mx and my):
-        dx=directionx
-        dy=directiony
-        if abs(mx)>abs(my):                      
-            directionx=dx*int(mx/my) 
-            targhetx=currentx+(abs(my)*directionx)
-        if abs(my)>abs(mx):                      
-            directiony=dy*int(my/mx) 
-            targhety=currenty+(abs(mx)*directiony)      
-    #print("dupa tx=",targhetx,"ty=",targhety,"dix=",directionx," diy=",directiony)        
+            y1=y0+k 
+            
+        
+    print(x0," ",y0," ",x1," ",y1)
+    dx = abs(x1 - x0)
+    if x0<x1:
+        sx=1
+    else:
+        sx=-1
+    dy = -abs(y1 - y0)
+    if y0<y1:
+        sy=1
+    else:
+        sy=-1
+    error = dx + dy        
+           
     
-def do_step():
-    global currentx,directionx,currenty,directiony,targhetx,targhety
-
-
-    if mx:
-        currentx +=directionx
-
-    if my:        
-        currenty +=directiony
-  
-    #print("dirx=",directionx," diry=",directiony)
-    #print("x=",currentx," to ",targhetx," y=",currenty," to ",targhety)  
+def do_step(): 
+    global currentx,x0,y0,x1,y1,sx,sy,dx,dy,error
+    print("x0=",x0," x1=",x1," y0=",y0," y1=",y1)
+    e2 = 2 * error
+    if e2 >= dy:
+        error = error + dy
+        x0 = x0 + sx
+    if e2 <= dx:
+        error = error + dx
+        y0 = y0 + sy   
     time.sleep(.001)
+    
+    
 
 while True:
-    if (currentx==targhetx) and (currenty==targhety): # arrivatto in punto di destinazione
+
+    if x0 == x1 and y0 == y1: # arrivatto in punto di destinazione
         if len(buffer)>0: # daca buffer e gol atunci sare peste asta
             #print(len(buffer)," buffer prima=",buffer)
             gcode_exec(buffer.pop(0)) 
             #print(len(buffer)," buffer dopo=",buffer)
-            conn.send("ok\n")   
+            conn.send("ok\n")
+            currentx=0            
     else:
             do_step() # executa pana ajunge la destinazione
+
     try:       
         request = conn.recv(200).decode()         
         if "?" in request:   
-            conn.send("<Idle|MPos:"+str(currentx)+","+str(currenty)+",0.000|FS:0,0>\r")
+            conn.send("<Idle|MPos:"+str(x0)+","+str(y0)+",0.000|FS:0,0>\r")
         elif "$$" in request:
             conn.send("ok\n")
         else: 
@@ -136,3 +124,36 @@ while True:
 # Clean up the connection.
 conn.close()
 print("closed. ") 
+
+'''
+def plotLine(x0, y0, x1, y1):
+    dx = abs(x1 - x0)
+    if x0<x1:
+        sx=1
+    else:
+        sx=-1
+    dy = -abs(y1 - y0)
+    if y0<y1:
+        sy=1
+    else:
+        sy=-1
+    error = dx + dy
+    
+    while True:
+        print(x0," ", y0)
+        if x0 == x1 and y0 == y1:
+            break
+        e2 = 2 * error
+        if e2 >= dy:
+            if x0 == x1:
+                break
+            error = error + dy
+            x0 = x0 + sx
+        if e2 <= dx:
+            if y0 == y1:
+                break
+            error = error + dx
+            y0 = y0 + sy
+plotLine(0,-10,6,4)
+
+'''
