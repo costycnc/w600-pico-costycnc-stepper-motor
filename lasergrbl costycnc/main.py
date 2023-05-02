@@ -226,35 +226,3 @@ while True:
 conn.close()
 print("closed. ") 
 
-'''
-def plotLine(x0, y0, x1, y1):
-    dx = abs(x1 - x0)
-    if x0<x1:
-        sx=1
-    else:
-        sx=-1
-    dy = -abs(y1 - y0)
-    if y0<y1:
-        sy=1
-    else:
-        sy=-1
-    error = dx + dy
-    
-    while True:
-        print(x0," ", y0)
-        if x0 == x1 and y0 == y1:
-            break
-        e2 = 2 * error
-        if e2 >= dy:
-            if x0 == x1:
-                break
-            error = error + dy
-            x0 = x0 + sx
-        if e2 <= dx:
-            if y0 == y1:
-                break
-            error = error + dx
-            y0 = y0 + sy
-plotLine(0,-10,6,4)
-
-'''
