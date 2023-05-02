@@ -45,7 +45,7 @@ def gcode_exec(strg):
       
     if ("X") in strg:
         nn=strg.split("X")
-        k=int(float(extract(nn[1])))
+        k=int(float(extract(nn[1]))*10)
         if absolute:
             x1=k             
         else:
@@ -55,7 +55,7 @@ def gcode_exec(strg):
     if ("Y") in strg:
         targhety=0
         nn=strg.split("Y")
-        k=int(float(extract(nn[1])))
+        k=int(float(extract(nn[1]))*10)
         if absolute:
             y1=k
         else:
@@ -105,7 +105,7 @@ while True:
     try:       
         request = conn.recv(200).decode()         
         if "?" in request:   
-            conn.send("<Idle|MPos:"+str(x0)+","+str(y0)+",0.000|FS:0,0>\r")
+            conn.send("<Idle|MPos:"+str(x0/10)+","+str(y0/10)+",0.000|FS:0,0>\r")
         elif "$$" in request:
             conn.send("ok\n")
         else: 
