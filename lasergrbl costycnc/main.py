@@ -8,6 +8,10 @@ led = Pin(Pin.PB_09, Pin.OUT, Pin.PULL_FLOATING)
 led1 = Pin(Pin.PB_10, Pin.OUT, Pin.PULL_FLOATING)
 led2 = Pin(Pin.PB_11, Pin.OUT, Pin.PULL_FLOATING)
 led3 = Pin(Pin.PB_12, Pin.OUT, Pin.PULL_FLOATING)
+led4 = Pin(Pin.PB_18, Pin.OUT, Pin.PULL_FLOATING)
+led5 = Pin(Pin.PB_06, Pin.OUT, Pin.PULL_FLOATING)
+led6 = Pin(Pin.PB_07, Pin.OUT, Pin.PULL_FLOATING)
+led7 = Pin(Pin.PB_08, Pin.OUT, Pin.PULL_FLOATING)
 
 s = socket.socket()
 s.bind(('', 23))
@@ -29,6 +33,49 @@ absolute=0
 k=0
 nn=[]
 este=0
+
+
+def movey(pasy):
+    if pasy==0:
+        led4.value(1)
+        led5.value(0)
+        led6.value(0)
+        led7.value(1)
+    if pasy==1:
+        led4.value(1)
+        led5.value(0)
+        led6.value(0)
+        led7.value(0)
+    if pasy==2:
+        led4.value(1)
+        led5.value(1)
+        led6.value(0)
+        led7.value(0)
+    if pasy==3:
+        led4.value(0)
+        led5.value(1)
+        led6.value(0)
+        led7.value(0)
+    if pasy==4:
+        led4.value(0)
+        led5.value(1)
+        led6.value(1)
+        led7.value(0)
+    if pasy==5:
+        led4.value(0)
+        led5.value(0)
+        led6.value(1)
+        led7.value(0)
+    if pasy==6:
+        led4.value(0)
+        led5.value(0)
+        led6.value(1)
+        led7.value(1)
+    if pasy==7:
+        led4.value(0)
+        led5.value(0)
+        led6.value(0)
+        led7.value(1)
 
 
 def movex(pasx):
@@ -74,9 +121,7 @@ def movex(pasx):
         led2.value(0)
         led3.value(1)
 
-    
-def movey(valy):
-    print(valy)    
+       
 
 
 def extract(a4):
