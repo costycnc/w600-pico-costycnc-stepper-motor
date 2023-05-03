@@ -4,10 +4,10 @@ from machine import Pin
 import socket
 import time
 
-led = Pin(Pin.PB_09, Pin.OUT, Pin.PULL_FLOATING)
-led1 = Pin(Pin.PB_10, Pin.OUT, Pin.PULL_FLOATING)
-led2 = Pin(Pin.PB_11, Pin.OUT, Pin.PULL_FLOATING)
-led3 = Pin(Pin.PB_12, Pin.OUT, Pin.PULL_FLOATING)
+led = Pin(Pin.PB_14, Pin.OUT, Pin.PULL_FLOATING)
+led1 = Pin(Pin.PB_15, Pin.OUT, Pin.PULL_FLOATING)
+led2 = Pin(Pin.PB_16, Pin.OUT, Pin.PULL_FLOATING)
+led3 = Pin(Pin.PB_17, Pin.OUT, Pin.PULL_FLOATING)
 led4 = Pin(Pin.PB_18, Pin.OUT, Pin.PULL_FLOATING)
 led5 = Pin(Pin.PB_06, Pin.OUT, Pin.PULL_FLOATING)
 led6 = Pin(Pin.PB_07, Pin.OUT, Pin.PULL_FLOATING)
@@ -160,3 +160,5 @@ while True:
 # Clean up the connection.
 conn.close()
 print("closed. ") 
+
+
