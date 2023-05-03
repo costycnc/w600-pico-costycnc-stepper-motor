@@ -33,95 +33,23 @@ absolute=0
 k=0
 nn=[]
 este=0
+x=[1,3,2,6,4,12,8,9]
+dorme=1
 
 
 def movey(pasy):
-    if pasy==0:
-        led4.value(1)
-        led5.value(0)
-        led6.value(0)
-        led7.value(1)
-    if pasy==1:
-        led4.value(1)
-        led5.value(0)
-        led6.value(0)
-        led7.value(0)
-    if pasy==2:
-        led4.value(1)
-        led5.value(1)
-        led6.value(0)
-        led7.value(0)
-    if pasy==3:
-        led4.value(0)
-        led5.value(1)
-        led6.value(0)
-        led7.value(0)
-    if pasy==4:
-        led4.value(0)
-        led5.value(1)
-        led6.value(1)
-        led7.value(0)
-    if pasy==5:
-        led4.value(0)
-        led5.value(0)
-        led6.value(1)
-        led7.value(0)
-    if pasy==6:
-        led4.value(0)
-        led5.value(0)
-        led6.value(1)
-        led7.value(1)
-    if pasy==7:
-        led4.value(0)
-        led5.value(0)
-        led6.value(0)
-        led7.value(1)
-
+    global x
+    #print((x[a] >> 0) & 1,(x[a] >> 1) & 1,(x[a] >> 2) & 1,(x[a] >> 3) & 1)
+    led4.value((x[pasy] >> 0) & 1)
+    led5.value((x[pasy] >> 1) & 1)
+    led6.value((x[pasy] >> 2) & 1)
+    led7.value((x[pasy] >> 3) & 1)
 
 def movex(pasx):
-    print(pasx)
-    if pasx==0:
-        led.value(1)
-        led1.value(0)
-        led2.value(0)
-        led3.value(1)
-    if pasx==1:
-        led.value(1)
-        led1.value(0)
-        led2.value(0)
-        led3.value(0)
-    if pasx==2:
-        led.value(1)
-        led1.value(1)
-        led2.value(0)
-        led3.value(0)
-    if pasx==3:
-        led.value(0)
-        led1.value(1)
-        led2.value(0)
-        led3.value(0)
-    if pasx==4:
-        led.value(0)
-        led1.value(1)
-        led2.value(1)
-        led3.value(0)
-    if pasx==5:
-        led.value(0)
-        led1.value(0)
-        led2.value(1)
-        led3.value(0)
-    if pasx==6:
-        led.value(0)
-        led1.value(0)
-        led2.value(1)
-        led3.value(1)
-    if pasx==7:
-        led.value(0)
-        led1.value(0)
-        led2.value(0)
-        led3.value(1)
-
-       
+    led.value((x[pasx] >> 0) & 1)
+    led1.value((x[pasx] >> 1) & 1)
+    led2.value((x[pasx] >> 2) & 1)
+    led3.value((x[pasx] >> 3) & 1)
 
 
 def extract(a4):
@@ -182,11 +110,13 @@ def do_step():
     if e2 >= dy:
         error = error + dy
         x0 = x0 + sx
-        movex((x0&4)+(x0&2)+(x0&1))
+        #print("sx=",sx)
+        movex(x0&7)
     if e2 <= dx:
         error = error + dx
         y0 = y0 + sy
-        movey((y0&4)+(y0&2)+(y0&1))        
+        #print("sy=",sy)
+        movey(y0&7)        
     time.sleep(.001)
     
     
@@ -207,6 +137,11 @@ while True:
         request = conn.recv(200).decode()         
         if "?" in request:   
             conn.send("<Idle|MPos:"+str(x0/100)+","+str(y0/100)+",0.000|FS:0,0>\r")
+            if(x0==0)and(y0==0): #se cursore e arivatto in 0,0 e buffer ancora ha data
+                if len(buffer)>0: # significa che qualche ok e scapato o almeno non mi spiego 
+                    conn.send("ok\n") #perche 3-4 istruzioni a fine risulta non lette
+                    
+                 
         elif "$$" in request:
             conn.send("ok\n")
         else: 
@@ -225,4 +160,3 @@ while True:
 # Clean up the connection.
 conn.close()
 print("closed. ") 
-
