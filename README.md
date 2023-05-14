@@ -11,3 +11,5 @@ ftp program https://filezilla-project.org/
 lasergrbl https://lasergrbl.com/
 
 gcode sa ma inspir https://github.com/alx/reprap-arduino-firmware/blob/master/GCode_Interpreter/process_string.pde
+
+https://w600.chip.haus/
